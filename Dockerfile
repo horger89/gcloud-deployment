@@ -1,22 +1,33 @@
-# Use a slim Python 3.9 base image
-FROM python:3.11-slim
+# Use a minimal Python 3.11 base image
+FROM python:3.10-alpine3.14
+
+# Install necessary development tools
+RUN apk add --no-cache build-base linux-headers
 
 # Set environment variable for unbuffered output
 ENV PYTHONUNBUFFERED 1
 
-# Create a working directory for the application
-WORKDIR /app
-
-# Copy requirements.txt and install dependencies
-COPY requirements.txt ./
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
-
-# Copy your Django project code
+COPY ./requirements.txt /requirements.txt
 COPY ./app /app
+COPY ./scripts /scripts
 
-# Expose port 8000 (default for Django development server)
+# Create a directory for the application code
+WORKDIR /app
 EXPOSE 8000
 
-# Set the command to run migrations, collect static files (if applicable), and start the development server
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Install system dependencies
+RUN python -m venv /py && \
+    /py/bin/pip install --upgrade pip && \
+    /py/bin/pip install -r /requirements.txt && \
+    adduser --disabled-password --no-create-home app && \
+    mkdir -p /vol/web/static && \
+    chown -R app:app /vol && \
+    chmod -R 755 /vol && \
+    chmod -R +x /scripts
+
+ENV PATH="/scripts:/py/bin:$PATH"
+
+USER app
+    
+# Command to run the production server
+CMD ["run.sh"]

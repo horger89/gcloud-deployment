@@ -1,12 +1,26 @@
-version: '3'
+version: "3.9"
 
 services:
-  web:
+  app:
     build:
       context: .
-      dockerfile: Dockerfile
-    image: dev-rest-api
-    ports:
-      - "8000:8000"
+    image: production-api
+    restart: always
+    volumes:
+      - static-data:/vol/web
     env_file:
       - .env
+
+  proxy:
+    build:
+      context: ./proxy
+    restart: always
+    depends_on:
+      - app
+    ports:
+      - 80:8000
+    volumes:
+      - static-data:/vol/static
+
+volumes:
+  static-data:
