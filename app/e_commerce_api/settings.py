@@ -203,5 +203,5 @@ SWAGGER_SETTINGS = {
             'bearerFormat': 'JWT'
         }
     },
-    'USE_SESSION_AUTH': False
+    'USE_SESSION_AUTH': False,
 }

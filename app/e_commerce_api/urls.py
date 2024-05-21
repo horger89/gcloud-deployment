@@ -20,6 +20,9 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+import os
+import dotenv
+dotenv.load_dotenv()
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -32,6 +35,7 @@ schema_view = get_schema_view(
    ),
    public=True,
    permission_classes=(permissions.AllowAny,),
+   url=os.environ.get('URL'),
 )
 
 urlpatterns = [
@@ -51,4 +55,3 @@ urlpatterns = [
 
 handler404 = "utils.error_views.handler404"
 handler500 = "utils.error_views.handler500"
-
