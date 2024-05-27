@@ -10,6 +10,8 @@ from rest_framework.permissions import IsAuthenticated
 from django.db.models import Avg
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.decorators import parser_classes
+from rest_framework.parsers import MultiPartParser
 
 # Create your views here.
 
@@ -86,30 +88,28 @@ def new_product(request):
 
 
 @swagger_auto_schema(
-    method='POST',
-    request_body=openapi.Schema(
-        type='object',
-        properties={
-            'product': openapi.Schema(type='integer'),
-            'images': openapi.Schema(
-                type='array',  # Array of items
-                items=openapi.Schema(  # Define the schema for each item
-                    type='string',  # Specify the overall type as string
-                    oneOf=[  # Allow one of the following formats
-                        openapi.Schema(type='string', format='binary'),
-                        openapi.Schema(type='string', format='uri')
-                    ]
-                ),
-                description="""
-                An array containing base64 encoded image data.
-                """
-            )
-        },
-        required=['product', 'images']
-    )
+    method='post',
+    manual_parameters=[
+        openapi.Parameter(
+            name='product',
+            in_=openapi.IN_FORM,
+            type=openapi.TYPE_INTEGER,
+            required=True,
+            description='ID of the product'
+        ),
+        openapi.Parameter(
+            name='images',
+            in_=openapi.IN_FORM,
+            type=openapi.TYPE_FILE,
+            required=True,
+            description='Array of image files',
+            multiple=True  # This allows multiple files to be uploaded
+        ),
+    ],
 )
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser])
 def upload_product_images(request):
     """Upload Images to AWS bucket"""
     data = request.data
